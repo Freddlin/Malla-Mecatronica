@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla Curricular - Ing. Mecatrónica UNLZ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8f9ff;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      height: 60px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #3D3BFF;
+      font-size: 2rem;
+    }
+
+    .contenedor-malla {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 20px;
+      padding-bottom: 30px;
+    }
+
+    .cuatrimestre {
+      flex: 0 0 260px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      border: 2px solid #d1d1ff;
+    }
+
+    .cuatrimestre h2 {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #bdbdff;
+      padding-bottom: 8px;
+      color: #2F2BA3;
+    }
+
+    .materia {
+      background-color: #e6e6ff;
+      border-left: 6px solid #3D3BFF;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #1a1a66;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .materia:hover {
+      background-color: #d4d4ff;
+      transform: scale(1.02);
+    }
+
+    .materia.aprobada {
+      background-color: #b2f2bb;
+      border-left-color: #5cb85c;
+      color: #005500;
+      text-decoration: line-through;
+    }
+
+    .materia.bloqueada {
+      background-color: #f0f0f0;
+      color: #aaa;
+      border-left-color: #ccc;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(60, 60, 60, 0.95);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      max-width: 240px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="logo-unlz.png" alt="Logo UNLZ" class="logo">
+    <h1>Ingeniería Mecatrónica UNLZ</h1>
+  </div>
+
+  <div class="contenedor-malla" id="contenedor-malla"></div>
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    const materias = [
+      { id: 'grafica1', nombre: 'Medios de Representación Gráfica I', cuatrimestre: 1, correlativas: [] },
+      { id: 'intro_ingenieria', nombre: 'Introducción a la Ingeniería', cuatrimestre: 1, correlativas: [] },
+      { id: 'ingles', nombre: 'Inglés', cuatrimestre: 1, correlativas: [] },
+      { id: 'informatica1', nombre: 'Taller de Informática General y Aplicada', cuatrimestre: 1, correlativas: [] },
+      { id: 'grafica2', nombre: 'Medios de Representación Gráfica II', cuatrimestre: 2, correlativas: ['grafica1'] },
+      { id: 'fund_computadoras', nombre: 'Fundamentos de los Computadores Digitales', cuatrimestre: 2, correlativas: ['informatica1'] },
+      { id: 'higiene1', nombre: 'Higiene y Seguridad en el Trabajo I', cuatrimestre: 2, correlativas: ['intro_ingenieria'] },
+      { id: 'medio_ambiente', nombre: 'Gestión del Medio Ambiente', cuatrimestre: 2, correlativas: ['intro_ingenieria'] },
+      { id: 'eco1', nombre: 'Economía I', cuatrimestre: 2, correlativas: ['intro_ingenieria'] },
+      { id: 'mate1', nombre: 'Matemática I', cuatrimestre: 3, correlativas: ['intro_ingenieria'] },
+      { id: 'innovacion', nombre: 'Gestión de la Innovación y la Tecnología', cuatrimestre: 3, correlativas: ['intro_ingenieria', 'eco1', 'ingles'] },
+      { id: 'programacion', nombre: 'Informática y Programación Industrial', cuatrimestre: 3, correlativas: ['fund_computadoras'] },
+      { id: 'legislacion', nombre: 'Legislación y Ejercicio Profesional', cuatrimestre: 3, correlativas: ['higiene1'] },
+      { id: 'calidad', nombre: 'Gestión de la Calidad', cuatrimestre: 3, correlativas: ['eco1'] },
+      { id: 'eco2', nombre: 'Economía II', cuatrimestre: 3, correlativas: ['eco1'] },
+      { id: 'fisica1', nombre: 'Física I', cuatrimestre: 4, correlativas: ['mate1'] },
+      { id: 'gestion_industrial', nombre: 'Organización y Gestión Industrial', cuatrimestre: 4, correlativas: ['calidad', 'eco2', 'grafica2'] },
+      { id: 'quimica', nombre: 'Fundamentos de Química', cuatrimestre: 4, correlativas: ['medio_ambiente'] },
+      { id: 'mate2', nombre: 'Matemática II', cuatrimestre: 4, correlativas: ['mate1'] },
+      { id: 'calculo1', nombre: 'Cálculo I', cuatrimestre: 5, correlativas: ['mate2'] },
+      { id: 'termodinamica', nombre: 'Termodinámica', cuatrimestre: 5, correlativas: ['fisica1', 'quimica'] },
+      { id: 'fisica2', nombre: 'Física II', cuatrimestre: 5, correlativas: ['fisica1'] },
+      { id: 'estadistica', nombre: 'Probabilidad y Estadística', cuatrimestre: 5, correlativas: ['mate1', 'calidad'] },
+      { id: 'estatica', nombre: 'Estática', cuatrimestre: 6, correlativas: ['fisica1', 'grafica2'] },
+      { id: 'higiene2', nombre: 'Higiene y Seguridad en el Trabajo II', cuatrimestre: 6, correlativas: ['higiene1', 'fisica2'] },
+      { id: 'calculo2', nombre: 'Cálculo II', cuatrimestre: 6, correlativas: ['calculo1'] },
+      { id: 'mecanica_teorica', nombre: 'Mecánica Teórica', cuatrimestre: 6, correlativas: ['calculo1'] },
+      { id: 'electronica', nombre: 'Electrónica General y de Potencia', cuatrimestre: 6, correlativas: ['fisica2', 'programacion'] },
+      { id: 'formulacion_proyectos', nombre: 'Formulación Gestion y Evaluación de Proyectos', cuatrimestre: 7, correlativas: ['gestion_industrial', 'calculo1'] },
+      { id: 'mecanica_materiales', nombre: 'Mecánica de los Materiales', cuatrimestre: 7, correlativas: ['estatica'] },
+      { id: 'ciencia_materiales', nombre: 'Ciencia y Tecnología de los Materiales', cuatrimestre: 7, correlativas: ['quimica', 'estatica'] },
+      { id: 'electrotecnia', nombre: 'Electrotecnia', cuatrimestre: 7, correlativas: ['fisica2', 'calculo2'] },
+      { id: 'gestion_ambiental', nombre: 'Sistemas y Tecnologías para la Gestión Ambiental', cuatrimestre: 7, correlativas: ['gestion_industrial', 'higiene2'] },
+      { id: 'mecanismos', nombre: 'Mecanismos', cuatrimestre: 7, correlativas: ['mecanica_teorica'] },
+      { id: 'fabricacion', nombre: 'Tecnología de Fabricación', cuatrimestre: 8, correlativas: ['mecanismos', 'mecanica_materiales'] },
+      { id: 'calor', nombre: 'Tecnología del Calor', cuatrimestre: 8, correlativas: ['termodinamica', 'calculo2'] },
+      { id: 'fluidos', nombre: 'Mecánica de los Fluidos', cuatrimestre: 8, correlativas: ['termodinamica', 'calculo2'] },
+      { id: 'instalaciones', nombre: 'Máquinas e Instalaciones Eléctricas', cuatrimestre: 8, correlativas: ['electrotecnia'] },
+      { id: 'dinamica_sistemas', nombre: 'Modelado y Dinámica de Sistemas Mecánicos', cuatrimestre: 8, correlativas: ['mecanica_materiales', 'calculo2'] },
+      { id: 'componentes', nombre: 'Diseño de Componentes de Máquinas', cuatrimestre: 9, correlativas: ['fabricacion', 'estadistica', 'dinamica_sistemas'] },
+      { id: 'mecatronicos', nombre: 'Diseño de Sistemas Mecatrónicos', cuatrimestre: 9, correlativas: ['electronica', 'fabricacion'] },
+      { id: 'vigilancia', nombre: 'Vigilancia Tecnológica e Inteligencia Competitiva', cuatrimestre: 9, correlativas: ['legislacion', 'innovacion', 'fabricacion'] },
+      { id: 'procesamiento', nombre: 'Procesamiento de Señales', cuatrimestre: 9, correlativas: ['electronica', 'fabricacion', 'dinamica_sistemas'] },
+      { id: 'automatizacion', nombre: 'Automatización Industrial', cuatrimestre: 9, correlativas: ['electronica', 'fluidos', 'electrotecnia'] },
+      { id: 'robotica', nombre: 'Fundamentos de Robótica', cuatrimestre: 10, correlativas: ['mecatronicos'] },
+      { id: 'instrumentacion', nombre: 'Instrumentación Industrial, Mediciones Mecánicas, Eléctricas y Electrónicas', cuatrimestre: 10, correlativas: ['fabricacion', 'instalaciones'] },
+      { id: 'control', nombre: 'Sistemas de Control', cuatrimestre: 10, correlativas: ['automatizacion'] },
+      { id: 'redes', nombre: 'Redes de Comunicación Industriales', cuatrimestre: 10, correlativas: ['procesamiento'] },
+      { id: 'proyecto_final', nombre: 'Proyecto en Ing. Mecatrónica', cuatrimestre: 10, correlativas: ['automatizacion', 'formulacion_proyectos', 'componentes', 'mecatronicos', 'vigilancia'] }
+    ];
+
+    const estado = JSON.parse(localStorage.getItem('estadoMaterias') || '{}');
+    const contenedor = document.getElementById('contenedor-malla');
+    const tooltip = document.getElementById('tooltip');
+
+    function agruparPorCuatrimestre(data) {
+      const agrupado = {};
+      data.forEach(m => {
+        if (!agrupado[m.cuatrimestre]) agrupado[m.cuatrimestre] = [];
+        agrupado[m.cuatrimestre].push(m);
+      });
+      return agrupado;
+    }
+
+    function render() {
+      contenedor.innerHTML = '';
+      const agrupado = agruparPorCuatrimestre(materias);
+      const aprobadas = Object.entries(estado).filter(([_, v]) => v === true).map(([id]) => id);
+
+      for (const [cuatri, lista] of Object.entries(agrupado)) {
+        const columna = document.createElement('div');
+        columna.className = 'cuatrimestre';
+        columna.innerHTML = `<h2>${cuatri}° Cuatrimestre</h2>`;
+
+        lista.forEach(m => {
+          const desbloqueada = m.correlativas.every(c => aprobadas.includes(c));
+          const div = document.createElement('div');
+          div.className = 'materia';
+          div.textContent = m.nombre;
+
+          if (!desbloqueada && !estado[m.id]) {
+            div.classList.add('bloqueada');
+            const faltantes = m.correlativas.filter(c => !aprobadas.includes(c));
+            const nombresFaltantes = materias
+              .filter(mat => faltantes.includes(mat.id))
+              .map(mat => mat.nombre)
+              .join(', ');
+
+            div.addEventListener('mouseenter', () => {
+              tooltip.textContent = `Requiere: ${nombresFaltantes}`;
+              tooltip.style.opacity = 1;
+            });
+
+            div.addEventListener('mouseleave', () => {
+              tooltip.style.opacity = 0;
+            });
+
+            div.addEventListener('touchstart', () => {
+              tooltip.textContent = `Requiere: ${nombresFaltantes}`;
+              tooltip.style.opacity = 1;
+              setTimeout(() => tooltip.style.opacity = 0, 3000);
+            });
+          } else if (estado[m.id]) {
+            div.classList.add('aprobada');
+          }
+
+          div.addEventListener('click', () => {
+            if (!div.classList.contains('bloqueada')) {
+              estado[m.id] = !estado[m.id];
+              localStorage.setItem('estadoMaterias', JSON.stringify(estado));
+              render();
+            }
+          });
+
+          columna.appendChild(div);
+        });
+
+        contenedor.appendChild(columna);
+      }
+    }
+
+    document.addEventListener('mousemove', e => {
+      tooltip.style.left = e.pageX + 15 + 'px';
+      tooltip.style.top = e.pageY + 15 + 'px';
+    });
+
+    document.addEventListener('touchmove', e => {
+      if (e.touches.length > 0) {
+        tooltip.style.left = e.touches[0].pageX + 15 + 'px';
+        tooltip.style.top = e.touches[0].pageY + 15 + 'px';
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
